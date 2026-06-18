@@ -1,3 +1,3 @@
-module simple_av
+module SimpleAV
 
 go 1.26.1
