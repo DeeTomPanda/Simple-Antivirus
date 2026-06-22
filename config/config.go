@@ -7,18 +7,20 @@ import (
 )
 
 var (
-	LogPath string
-	DBPath  string
+	LogPath     string
+	DBPath      string
+	DBName      = "simpleAV.db"
+	LogFileName = "AV.log"
 )
 
 func Init() {
 	switch runtime.GOOS {
 	case "windows":
 		base := os.Getenv("ProgramData")
-		LogPath = filepath.Join(base, "Simple-AV", "AV.log")
-		DBPath = filepath.Join(base, "Simple-AV", "simpleAV.db")
+		LogPath = filepath.Join(base, "Simple-AV")
+		DBPath = filepath.Join(base, "Simple-AV")
 	case "linux":
-		LogPath = filepath.Join("/", "var", "log", "simple_av", "AV.log")
-		DBPath = filepath.Join("/", "var", "lib", "simple_av", "simpleAV.db")
+		LogPath = filepath.Join("/", "var", "log", "simple_av")
+		DBPath = filepath.Join("/", "var", "lib", "simple_av")
 	}
 }

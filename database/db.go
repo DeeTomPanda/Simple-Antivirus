@@ -2,11 +2,11 @@ package database
 
 import (
 	"SimpleAV/apperrors"
+	"SimpleAV/config"
 	"SimpleAV/models"
+	sysutils "SimpleAV/sys_utils"
 	"fmt"
-	"os"
 	"path/filepath"
-	"runtime"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -15,20 +15,9 @@ import (
 var DB *gorm.DB
 
 func ConnectDB() error {
-	const dbName = "simpleAV.db"
 	var err error
-	var dbDir string
 
-	switch runtime.GOOS {
-	case "windows":
-		dbDir = filepath.Join(os.Getenv("ProgramData"), "Simple-AV")
-	case "linux":
-		dbDir = filepath.Join(string(os.PathSeparator), "var", "lib", "simple_av")
-	case "darwin":
-		return fmt.Errorf("unsupported platform: %w", apperrors.ErrUnsupportedPlatform)
-	}
-
-	DB, err = OpenDB(dbDir, dbName)
+	DB, err = OpenDB(config.DBPath, config.DBName)
 	if err != nil {
 		return err
 	}
@@ -43,7 +32,7 @@ func ConnectDB() error {
 }
 
 func OpenDB(dbDir string, dbName string) (*gorm.DB, error) {
-	err := ensureDir(dbDir)
+	err := sysutils.EnsureDir(dbDir)
 	if err != nil {
 		return nil, fmt.Errorf("ensure DBDir exists %w: %w", apperrors.ErrDatabaseDown, err)
 	}
@@ -56,8 +45,4 @@ func OpenDB(dbDir string, dbName string) (*gorm.DB, error) {
 	}
 
 	return db, err
-}
-
-func ensureDir(dbDir string) error {
-	return os.MkdirAll(dbDir, 0755)
 }
