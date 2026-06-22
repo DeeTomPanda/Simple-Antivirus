@@ -31,6 +31,9 @@ func CheckMaliciousHash(filePath string) (bool, error) {
 
 	// lock file to avoid modifications during scan
 	err = sysutils.LockFile(file)
+	if err != nil {
+		return false, fmt.Errorf("file lock failed, %w:%w", apperrors.ErrLocking, err)
+	}
 	defer sysutils.UnlockFile(file)
 
 	sha256Hash, err := convertToSHA256(file)

@@ -40,6 +40,7 @@ var (
 	ErrAccessDenied        = errors.New("insufficient permissions to access this file")
 	ErrUnsupportedPlatform = errors.New("Platform unsupported")
 	ErrHashing             = errors.New("Encountered error in hashing")
+	ErrLocking             = errors.New("error while scanning file")
 )
 
 var ErrorMap = map[error]*AppError{
@@ -54,5 +55,9 @@ var ErrorMap = map[error]*AppError{
 	ErrHashing: {
 		Code:    100,
 		Message: "Hashing failed",
+	},
+	ErrLocking: {
+		Code:    101,
+		Message: "File Modified",
 	},
 }
