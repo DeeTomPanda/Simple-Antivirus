@@ -1,17 +1,25 @@
 package hash
 
 import (
+	"SimpleAV/apperrors"
 	"SimpleAV/database"
 	"SimpleAV/models"
 	sysutils "SimpleAV/sys_utils"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 
 	"gorm.io/gorm"
 )
+
+type Checker struct{}
+
+func (c *Checker) CheckMaliciousHash(path string) (bool, error) {
+	return CheckMaliciousHash(path)
+}
 
 func CheckMaliciousHash(filePath string) (bool, error) {
 
@@ -27,7 +35,7 @@ func CheckMaliciousHash(filePath string) (bool, error) {
 
 	sha256Hash, err := convertToSHA256(file)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("hashing err %w:%w", apperrors.ErrHashing, err)
 	}
 
 	exists, err := checkHashInDB(sha256Hash)
@@ -49,7 +57,7 @@ func checkHashInDB(hash string) (bool, error) {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return false, nil
 		}
-		return false, result.Error
+		return false, fmt.Errorf("something wrong with DB %w : %w", apperrors.ErrDatabaseDown, result.Error)
 	}
 
 	// is malware !

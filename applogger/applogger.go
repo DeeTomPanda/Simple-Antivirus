@@ -5,6 +5,7 @@ import (
 	"SimpleAV/config"
 	sysutils "SimpleAV/sys_utils"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -24,7 +25,14 @@ var (
 
 func Init(path string, debug bool) error {
 	debugMode = debug
-	var err error
+	var (
+		err   error
+		flags int
+	)
+	flags = log.Ldate | log.Ltime
+	if debug {
+		flags |= log.Lshortfile
+	}
 
 	err = sysutils.EnsureDir(path)
 	if err != nil {
@@ -35,7 +43,7 @@ func Init(path string, debug bool) error {
 		fmt.Println("error on opening file: %w", err)
 	}
 
-	logg = log.New(file, "AV-ENGINE: ", log.Ldate|log.Ltime|log.Lshortfile)
+	logg = log.New(io.MultiWriter(file, os.Stdout), "AV-ENGINE: ", flags)
 	return nil
 }
 
@@ -44,18 +52,21 @@ func logger(level LogLevel, msg string, err error) {
 		return
 	}
 
+	line := ""
 	if err != nil {
+
 		appErr := apperrors.Map(err)
 		switch debugMode {
 		case true:
-			logg.Printf("[%s] code: %v | msg: %s | trace: %+v", level, appErr.Code, appErr.Message, appErr.Err)
+			line = fmt.Sprintf("[%s] code: %v | msg: %s | trace: %+v", level, appErr.Code, appErr.Message, appErr.Err)
 		case false:
-			logg.Printf("[%s] %s:", level, appErr.Message)
+			line = fmt.Sprintf("[%s] %s:", level, appErr.Message)
 		}
-
 	} else {
-		logg.Printf("[%s] %s", level, msg)
+		line = fmt.Sprintf("[%s] %s", level, msg)
 	}
+	// log a level deep, dont show logging line
+	logg.Output(3, line)
 }
 
 func Info(msg string) {

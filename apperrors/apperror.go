@@ -39,6 +39,7 @@ var (
 	ErrDatabaseDown        = errors.New("security database is temporarily unavailable")
 	ErrAccessDenied        = errors.New("insufficient permissions to access this file")
 	ErrUnsupportedPlatform = errors.New("Platform unsupported")
+	ErrHashing             = errors.New("Encountered error in hashing")
 )
 
 var ErrorMap = map[error]*AppError{
@@ -49,5 +50,9 @@ var ErrorMap = map[error]*AppError{
 	ErrUnsupportedPlatform: {
 		Code:    600,
 		Message: "Unsupported Platform detected!",
+	},
+	ErrHashing: {
+		Code:    100,
+		Message: "Hashing failed",
 	},
 }
