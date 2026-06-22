@@ -54,9 +54,9 @@ Filesystem Event
 
 ### Detection
 
-* [ ] SHA-256 hashing
-* [ ] Hash database loading
-* [ ] Hash-based detection
+* [x] SHA-256 hashing
+* [x] Hash database loading
+* [x] Hash-based detection
 * [ ] YARA integration
 * [ ] Rule management
 
