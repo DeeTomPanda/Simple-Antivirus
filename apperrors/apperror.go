@@ -38,8 +38,8 @@ func Map(err error) *AppError {
 var (
 	ErrDatabaseDown        = errors.New("security database is temporarily unavailable")
 	ErrAccessDenied        = errors.New("insufficient permissions to access this file")
-	ErrUnsupportedPlatform = errors.New("Platform unsupported")
-	ErrHashing             = errors.New("Encountered error in hashing")
+	ErrUnsupportedPlatform = errors.New("platform unsupported")
+	ErrHashing             = errors.New("encountered error in hashing")
 	ErrLocking             = errors.New("error while scanning file")
 )
 
