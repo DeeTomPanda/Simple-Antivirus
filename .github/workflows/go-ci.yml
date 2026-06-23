@@ -1,0 +1,79 @@
+name: Go CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.26.1
+          cache: 'go'
+
+      - name: Install system dependencies for sqlite (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libsqlite3-dev
+
+      - name: Install system dependencies for sqlite (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install mingw -y
+          choco install sqlite -y
+          refreshenv
+
+      - name: Display Go environment
+        run: go env
+
+      - name: Download modules
+        run: go mod download
+
+      - name: Run fmt check (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          files=$(gofmt -l .)
+          if [ -n "$files" ]; then
+            echo "gofmt found issues:" >&2
+            echo "$files" >&2
+            exit 1
+          fi
+
+      - name: Run fmt check (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $files = & gofmt -l .
+          if ($files) {
+            Write-Error "gofmt found issues:`n$files"
+            exit 1
+          }
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Run tests
+        run: go test -v ./...
+
+      - name: Build
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            go build -v ./...
+          else
+            GOOS=linux go build -v ./...
+          fi
