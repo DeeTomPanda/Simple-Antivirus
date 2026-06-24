@@ -11,12 +11,20 @@ type HashChecker interface {
 	CheckMaliciousHash(path string) (bool, error)
 }
 
-type Scanner struct {
-	checker HashChecker
+type FileWatcher interface {
+	Watch(paths []string, input chan<- string, ctx context.Context)
 }
 
-func NewScanner(checker HashChecker) *Scanner {
-	return &Scanner{checker: checker}
+type Scanner struct {
+	hashChecker HashChecker
+	fileWatcher FileWatcher
+}
+
+func NewScanner(hashChecker HashChecker, watcher FileWatcher) *Scanner {
+	return &Scanner{
+		hashChecker: hashChecker,
+		fileWatcher: watcher,
+	}
 }
 
 func (s *Scanner) ScanDirectory(root string, ctx context.Context) error {
@@ -36,15 +44,23 @@ func (s *Scanner) ScanDirectory(root string, ctx context.Context) error {
 			return nil
 		}
 
-		malicious, err := s.checker.CheckMaliciousHash(path)
+		malicious, err := s.hashChecker.CheckMaliciousHash(path)
 		if err != nil {
 			return err
 		}
 
 		if malicious {
 			applogger.Warn("malware detected: " + path)
+		} else {
+			applogger.Info("Clean! " + path)
 		}
 
 		return nil
 	})
+}
+
+func (s *Scanner) Watch(paths []string, input chan<- string, ctx context.Context) {
+
+	s.fileWatcher.Watch(paths, input, ctx)
+
 }

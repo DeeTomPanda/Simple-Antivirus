@@ -70,10 +70,13 @@ jobs:
       - name: Run tests
         run: go test -v ./...
 
-      - name: Build
-        run: |
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            go build -v ./...
-          else
-            GOOS=linux go build -v ./...
-          fi
+
+      - name: Build (Linux)
+        if: runner.os != 'Windows'
+        run: GOOS=linux go build -v ./...
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: go build -v ./...
+

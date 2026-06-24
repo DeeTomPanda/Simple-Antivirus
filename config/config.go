@@ -24,3 +24,25 @@ func Init() {
 		DBPath = filepath.Join("/", "var", "lib", "simple_av")
 	}
 }
+
+func DefaultWatchPaths() []string {
+	switch runtime.GOOS {
+	case "linux":
+		return []string{
+			"/home",
+			"/etc",
+			"/usr/bin",
+			"/usr/local/bin",
+			"/root",
+		}
+	case "windows":
+		return []string{
+			`C:\Windows\System32`,
+			`C:\Windows\Temp`,
+			`C:\Users`,
+			`C:\ProgramData`,
+		}
+	default:
+		return []string{}
+	}
+}

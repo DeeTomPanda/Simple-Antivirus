@@ -48,9 +48,9 @@ Filesystem Event
 
 ### Monitoring
 
-* [ ] Filesystem watcher
-* [ ] Recursive directory watching
-* [ ] Configurable watch targets
+* [x] Filesystem watcher
+* [x] Recursive directory watching
+* [x] Configurable watch targets
 
 ### Detection
 
