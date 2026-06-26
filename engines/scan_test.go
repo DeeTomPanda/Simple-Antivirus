@@ -27,24 +27,29 @@ func (m *mockChecker) CheckMaliciousHash(path string) (bool, error) {
 
 type mockWatcher struct{}
 
-func (m *mockWatcher) Watch(paths []string, out chan<- string, ctx context.Context) {}
+func (m *mockWatcher) Watch(paths []string, out chan<- string, ctx context.Context) error {
+	return nil
+}
 
 type triggerWatcher struct{}
 
-func (m *triggerWatcher) Watch(paths []string, out chan<- string, ctx context.Context) {
+func (m *triggerWatcher) Watch(paths []string, out chan<- string, ctx context.Context) error {
 	for _, p := range paths {
 		select {
 		case out <- p:
 		case <-ctx.Done():
-			return
+			return nil
 		}
 	}
+
+	return nil
 }
 
 type blockingWatcher struct{}
 
-func (b *blockingWatcher) Watch(paths []string, out chan<- string, ctx context.Context) {
+func (b *blockingWatcher) Watch(paths []string, out chan<- string, ctx context.Context) error {
 	<-ctx.Done() // blocks until cancelled
+	return nil
 }
 
 // helper for temp files

@@ -55,7 +55,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	var sc = engines.NewScanner(&hashengine.Checker{}, &watcher.Watcher{})
+	var sc = engines.NewScanner(hashengine.NewChecker(), watcher.NewWatcher())
 	// channle to feed scanner
 	dirsToScan := make(chan string, 100)
 

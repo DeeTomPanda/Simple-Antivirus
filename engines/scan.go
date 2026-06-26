@@ -12,7 +12,7 @@ type HashChecker interface {
 }
 
 type FileWatcher interface {
-	Watch(paths []string, input chan<- string, ctx context.Context)
+	Watch(paths []string, input chan<- string, ctx context.Context) error
 }
 
 type Scanner struct {

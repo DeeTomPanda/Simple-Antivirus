@@ -17,13 +17,13 @@ import (
 
 type Checker struct{}
 
-func (c *Checker) CheckMaliciousHash(path string) (bool, error) {
-	return CheckMaliciousHash(path)
+func NewChecker() *Checker {
+	return &Checker{}
 }
 
-func CheckMaliciousHash(filePath string) (bool, error) {
+func (c *Checker) CheckMaliciousHash(path string) (bool, error) {
 
-	file, err := os.Open(filePath)
+	file, err := os.Open(path)
 	if err != nil {
 		return false, err
 	}
