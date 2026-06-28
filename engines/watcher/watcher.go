@@ -1,8 +1,10 @@
 package watcher
 
 import (
+	"SimpleAV/apperrors"
 	"SimpleAV/applogger"
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -48,7 +50,7 @@ func (w *Watcher) Watch(paths []string, input chan<- string, ctx context.Context
 
 	fw, err := fsnotify.NewWatcher()
 	if err != nil {
-		return err
+		return fmt.Errorf("%w:%w", apperrors.ErrFileWatch, err)
 	}
 	defer fw.Close()
 

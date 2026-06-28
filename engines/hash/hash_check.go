@@ -5,11 +5,8 @@ import (
 	"SimpleAV/database"
 	"SimpleAV/models"
 	sysutils "SimpleAV/sys_utils"
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 
 	"gorm.io/gorm"
@@ -36,7 +33,7 @@ func (c *Checker) CheckMaliciousHash(path string) (bool, error) {
 	}
 	defer sysutils.UnlockFile(file)
 
-	sha256Hash, err := convertToSHA256(file)
+	sha256Hash, err := sysutils.ConvertToSHA256FromFile(file)
 	if err != nil {
 		return false, fmt.Errorf("hashing err %w:%w", apperrors.ErrHashing, err)
 	}
@@ -66,21 +63,4 @@ func checkHashInDB(hash string) (bool, error) {
 	// is malware !
 	return true, nil
 
-}
-
-func convertToSHA256(file *os.File) (string, error) {
-
-	hasher := sha256.New()
-
-	// always reset to start of file
-	if _, err := file.Seek(0, 0); err != nil {
-		return "", err
-	}
-
-	if _, err := io.Copy(hasher, file); err != nil {
-		return "", err
-	}
-
-	// get a string from raw byte output
-	return hex.EncodeToString(hasher.Sum(nil)), nil
 }

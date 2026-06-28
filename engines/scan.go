@@ -15,15 +15,21 @@ type FileWatcher interface {
 	Watch(paths []string, input chan<- string, ctx context.Context) error
 }
 
-type Scanner struct {
-	hashChecker HashChecker
-	fileWatcher FileWatcher
+type Quarantiner interface {
+	Quarantine(filePath string) error
 }
 
-func NewScanner(hashChecker HashChecker, watcher FileWatcher) *Scanner {
+type Scanner struct {
+	hashChecker      HashChecker
+	fileWatcher      FileWatcher
+	quarantineEngine Quarantiner
+}
+
+func NewScanner(hashChecker HashChecker, watcher FileWatcher, quarantineEngine Quarantiner) *Scanner {
 	return &Scanner{
-		hashChecker: hashChecker,
-		fileWatcher: watcher,
+		hashChecker:      hashChecker,
+		fileWatcher:      watcher,
+		quarantineEngine: quarantineEngine,
 	}
 }
 
@@ -51,8 +57,11 @@ func (s *Scanner) ScanDirectory(root string, ctx context.Context) error {
 
 		if malicious {
 			applogger.Warn("malware detected: " + path)
-		} else {
-			applogger.Info("Clean! " + path)
+			err = s.quarantineEngine.Quarantine(path)
+			if err != nil {
+				applogger.Warn("issue on containing threat")
+				return err
+			}
 		}
 
 		return nil
@@ -60,7 +69,5 @@ func (s *Scanner) ScanDirectory(root string, ctx context.Context) error {
 }
 
 func (s *Scanner) Watch(paths []string, input chan<- string, ctx context.Context) {
-
 	s.fileWatcher.Watch(paths, input, ctx)
-
 }

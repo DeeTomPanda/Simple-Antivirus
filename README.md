@@ -62,7 +62,7 @@ Filesystem Event
 ### Response
 
 * [x] Detection logging
-* [ ] Quarantine support
+* [x] Quarantine support
 * [ ] Detection history
 
 ### Platform

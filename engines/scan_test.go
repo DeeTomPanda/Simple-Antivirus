@@ -52,6 +52,12 @@ func (b *blockingWatcher) Watch(paths []string, out chan<- string, ctx context.C
 	return nil
 }
 
+type mockQuarantiner struct{}
+
+func (m *mockQuarantiner) Quarantine(filePath string) error {
+	return nil
+}
+
 // helper for temp files
 func createTempFiles(t *testing.T, names ...string) (string, []string) {
 	t.Helper()
@@ -78,7 +84,7 @@ func TestScanner_MalwareDetected(t *testing.T) {
 		},
 	}
 
-	scanner := engines.NewScanner(checker, &mockWatcher{})
+	scanner := engines.NewScanner(checker, &mockWatcher{}, &mockQuarantiner{})
 	err := scanner.ScanDirectory(dir, context.Background())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -96,7 +102,7 @@ func TestScanner_CleanFiles(t *testing.T) {
 		},
 	}
 
-	scanner := engines.NewScanner(checker, &mockWatcher{})
+	scanner := engines.NewScanner(checker, &mockWatcher{}, &mockQuarantiner{})
 	err := scanner.ScanDirectory(dir, context.Background())
 	if err != nil {
 		t.Fatalf("expected no error on clean files, got: %v", err)
@@ -110,7 +116,7 @@ func TestScanner_ContextCancelledBeforeScan(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // cancel immediately before scan
 
-	scanner := engines.NewScanner(&mockChecker{}, &mockWatcher{})
+	scanner := engines.NewScanner(&mockChecker{}, &mockWatcher{}, &mockQuarantiner{})
 	err := scanner.ScanDirectory(dir, ctx)
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("expected context.Canceled, got: %v", err)
@@ -148,7 +154,7 @@ func TestScanner_ContextCancelledMidScan(t *testing.T) {
 		calls:     &callCount,
 	}
 
-	scanner := engines.NewScanner(cancellingChecker, &mockWatcher{})
+	scanner := engines.NewScanner(cancellingChecker, &mockWatcher{}, &mockQuarantiner{})
 	err := scanner.ScanDirectory(dir, ctx)
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("expected context.Canceled mid-scan, got: %v", err)
@@ -162,7 +168,7 @@ func TestScanner_CheckerError(t *testing.T) {
 	dbErr := apperrors.ErrDatabaseDown
 	checker := &mockChecker{err: dbErr}
 
-	scanner := engines.NewScanner(checker, &mockWatcher{})
+	scanner := engines.NewScanner(checker, &mockWatcher{}, &mockQuarantiner{})
 	err := scanner.ScanDirectory(dir, context.Background())
 	if !errors.Is(err, apperrors.ErrDatabaseDown) {
 		t.Fatalf("expected db error to propagate, got: %v", err)
@@ -173,7 +179,7 @@ func TestScanner_CheckerError(t *testing.T) {
 func TestScanner_EmptyDirectory(t *testing.T) {
 	dir := t.TempDir()
 
-	scanner := engines.NewScanner(&mockChecker{}, &mockWatcher{})
+	scanner := engines.NewScanner(&mockChecker{}, &mockWatcher{}, &mockQuarantiner{})
 	err := scanner.ScanDirectory(dir, context.Background())
 	if err != nil {
 		t.Fatalf("expected no error on empty dir, got: %v", err)
@@ -191,7 +197,7 @@ func TestScanner_WatcherTriggersScan(t *testing.T) {
 	}
 
 	tw := &triggerWatcher{}
-	scanner := engines.NewScanner(checker, tw)
+	scanner := engines.NewScanner(checker, tw, &mockQuarantiner{})
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
@@ -215,7 +221,7 @@ func TestScanner_WatcherStopsOnCancel(t *testing.T) {
 
 	// watcher that blocks until context cancelled
 	blocking := &blockingWatcher{}
-	scanner := engines.NewScanner(&mockChecker{}, blocking)
+	scanner := engines.NewScanner(&mockChecker{}, blocking, &mockQuarantiner{})
 
 	out := make(chan string, 10)
 	done := make(chan struct{})

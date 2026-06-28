@@ -36,28 +36,54 @@ func Map(err error) *AppError {
 
 // standard errors
 var (
+	ErrFileOpen            = errors.New("file failed to open")
+	ErrFileWatch           = errors.New("file watch failed")
 	ErrDatabaseDown        = errors.New("security database is temporarily unavailable")
 	ErrAccessDenied        = errors.New("insufficient permissions to access this file")
 	ErrUnsupportedPlatform = errors.New("platform unsupported")
 	ErrHashing             = errors.New("encountered error in hashing")
 	ErrLocking             = errors.New("error while scanning file")
+	ErrFileDeletion        = errors.New("file could not be deleted")
+	MarkErrFileDeletion    = errors.New("file could not be marked for deletion")
+	ErrDataCopy            = errors.New("error occured while copying")
 )
 
 var ErrorMap = map[error]*AppError{
-	ErrDatabaseDown: {
-		Code:    500,
-		Message: "Engine Warning: The signature database is unavailable.",
-	},
-	ErrUnsupportedPlatform: {
-		Code:    600,
-		Message: "Unsupported Platform detected!",
-	},
-	ErrHashing: {
+
+	ErrFileOpen: {
 		Code:    100,
-		Message: "Hashing failed",
+		Message: ErrFileOpen.Error(),
 	},
 	ErrLocking: {
 		Code:    101,
-		Message: "File Modified",
+		Message: ErrDatabaseDown.Error(),
+	},
+	ErrFileDeletion: {
+		Code:    102,
+		Message: ErrFileDeletion.Error(),
+	},
+	MarkErrFileDeletion: {
+		Code:    103,
+		Message: MarkErrFileDeletion.Error(),
+	},
+	ErrFileWatch: {
+		Code:    104,
+		Message: ErrFileWatch.Error(),
+	},
+	ErrHashing: {
+		Code:    200,
+		Message: ErrHashing.Error(),
+	},
+	ErrDataCopy: {
+		Code:    201,
+		Message: ErrDataCopy.Error(),
+	},
+	ErrDatabaseDown: {
+		Code:    400,
+		Message: ErrDatabaseDown.Error(),
+	},
+	ErrUnsupportedPlatform: {
+		Code:    600,
+		Message: ErrUnsupportedPlatform.Error(),
 	},
 }

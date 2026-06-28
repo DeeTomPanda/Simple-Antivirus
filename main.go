@@ -5,6 +5,7 @@ import (
 	"SimpleAV/database"
 	"SimpleAV/engines"
 	hashengine "SimpleAV/engines/hash"
+	"SimpleAV/engines/quarantine"
 	"SimpleAV/engines/watcher"
 	"context"
 	"errors"
@@ -55,7 +56,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	var sc = engines.NewScanner(hashengine.NewChecker(), watcher.NewWatcher())
+	var sc = engines.NewScanner(hashengine.NewChecker(), watcher.NewWatcher(), quarantine.NewQuarantiner())
 	// channle to feed scanner
 	dirsToScan := make(chan string, 100)
 
@@ -64,7 +65,10 @@ func main() {
 			select {
 			case <-ctx.Done():
 				return
-			case file := <-dirsToScan:
+			case file, ok := <-dirsToScan:
+				if !ok {
+					return
+				}
 				err := sc.ScanDirectory(file, ctx)
 				if err != nil {
 					applogger.Error(err)
@@ -90,6 +94,7 @@ func main() {
 
 	<-stop
 	cancel(errors.New("SIGTERM"))
+	close(dirsToScan)
 	wg.Wait()
 	applogger.Info("stopped, received stop signal")
 

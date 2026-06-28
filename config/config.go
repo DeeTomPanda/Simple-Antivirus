@@ -7,10 +7,11 @@ import (
 )
 
 var (
-	LogPath     string
-	DBPath      string
-	DBName      = "simpleAV.db"
-	LogFileName = "AV.log"
+	DBName        = "simpleAV.db"
+	LogFileName   = "AV.log"
+	LogPath       string
+	DBPath        string
+	QuarantineDir string
 )
 
 func Init() {
@@ -19,9 +20,11 @@ func Init() {
 		base := os.Getenv("ProgramData")
 		LogPath = filepath.Join(base, "Simple-AV")
 		DBPath = filepath.Join(base, "Simple-AV")
+		QuarantineDir = filepath.Join(base, "Simple-AV", "quarantine")
 	case "linux":
 		LogPath = filepath.Join("/", "var", "log", "simple_av")
 		DBPath = filepath.Join("/", "var", "lib", "simple_av")
+		QuarantineDir = filepath.Join("/", "var", "lib", "simple_av", "quarantine")
 	}
 }
 
