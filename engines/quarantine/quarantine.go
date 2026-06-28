@@ -40,7 +40,15 @@ func Init() error {
 }
 
 func (q *Quarantiner) Quarantine(filePath string) error {
+	if err := q.quarantineFile(filePath); err != nil {
+		return err
+	}
 
+	// delete the original file
+	return removeOriginal(filePath)
+}
+
+func (q *Quarantiner) quarantineFile(filePath string) error {
 	// check if file exists and can be read
 
 	f, err := os.Open(filePath)
@@ -104,8 +112,7 @@ func (q *Quarantiner) Quarantine(filePath string) error {
 		return err
 	}
 
-	// delete the original file
-	return removeOriginal(filePath)
+	return nil
 }
 
 type xorReader struct {
