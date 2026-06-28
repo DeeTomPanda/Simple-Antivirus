@@ -30,7 +30,17 @@ type QuarantineMeta struct {
 	Status          string
 }
 
+func Init() error {
+	err := sysutils.EnsureDir(config.QuarantineDir)
+	if err != nil {
+		fmt.Println("quarantine directory creaton is affected %w", err)
+		return err
+	}
+	return nil
+}
+
 func (q *Quarantiner) Quarantine(filePath string) error {
+
 	// check if file exists and can be read
 
 	f, err := os.Open(filePath)

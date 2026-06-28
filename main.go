@@ -39,6 +39,11 @@ func main() {
 	config.Init()
 	// logging configs
 	applogger.Init(config.LogPath, false)
+	// quarantine sir
+	err := quarantine.Init()
+	if err != nil {
+		applogger.Error(err)
+	}
 
 	scan := flag.String("scan", "", "directory to scan, -scan path_to_dir")
 
@@ -50,7 +55,7 @@ func main() {
 	applogger.Info("AV Scanner up and running...")
 
 	// TODO: Take args to read from csv and then set up DB
-	err := database.ConnectDB()
+	err = database.ConnectDB()
 	if err != nil {
 		applogger.Error(err)
 		os.Exit(1)
